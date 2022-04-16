@@ -1,6 +1,25 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { HomeModule } from './pages/home/home.module';
+import { Route, RouterModule, Routes } from '@angular/router';
+
+const pages = ['dashboard', 'profile', 'about', 'home'];
+
+function routeFactory<T extends string>(routes: T[]): Route[] {
+  const makeRoute = (route: Array<T>[number]) => {
+    const module = route.replace(/(^\w{1})|(\s+\w{1})/g, (letter) =>
+      letter.toUpperCase()
+    );
+    return {
+      path: route,
+      loadChildren: () =>
+        import(`./pages/${route}/${route}.module`).then(
+          (m) => m[`${module}Module`]
+        ),
+    };
+  };
+  return routes.map((route) => makeRoute(route));
+}
+
+const generatedRoutes = routeFactory(pages);
 
 const routes: Routes = [
   {
@@ -8,22 +27,7 @@ const routes: Routes = [
     redirectTo: 'home',
     pathMatch: 'full',
   },
-  {
-    path: 'home',
-    loadChildren: () => import('./pages/home/home.module').then(m => m.HomeModule),
-  },
-  {
-    path: 'dashboard',
-    loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
-  },
-  {
-    path: 'profile',
-    loadChildren: () => import('./pages/profile/profile.module').then(m => m.ProfileModule)
-  },
-  {
-    path: '',
-    loadChildren: () => import('./pages/about/about.module').then(m => m.AboutModule);
-  }
+  ...generatedRoutes,
 ];
 
 @NgModule({
