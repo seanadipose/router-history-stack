@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Route, RouterModule, Routes } from '@angular/router';
-
-const pages = ['dashboard', 'profile', 'about', 'home'];
+import { PAGES } from './pages.constant';
 
 function routeFactory<T extends string>(routes: T[]): Route[] {
   const makeRoute = (route: Array<T>[number]) => {
@@ -18,7 +17,7 @@ function routeFactory<T extends string>(routes: T[]): Route[] {
   };
   return routes.map((route) => makeRoute(route));
 }
-const generatedRoutes = routeFactory(pages);
+const generatedRoutes = routeFactory(PAGES);
 
 const routes: Routes = [
   {
