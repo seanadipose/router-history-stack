@@ -30,6 +30,7 @@ import { PageListType, PAGES_LIST } from './pages.constant';
 export class AppComponent {
   title = 'router-history-stack';
   routes: string[];
+  keyMap = new Map();
   goBack() {
     let current = this.navStack.pop();
     let prev = this.navStack.peek();
@@ -47,6 +48,12 @@ export class AppComponent {
     private router: Router
   ) {
     this.routes = pagesList;
+    this.router.config.forEach((routerConf) => {
+      const keyMap = routerConf.data ? routerConf.data['keymap'] : undefined;
+      if (keyMap && !this.keyMap.has(keyMap)) {
+        this.keyMap.set(keyMap, `/${routerConf.path}`);
+      }
+    });
     this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
         this.navStack.push(val);
