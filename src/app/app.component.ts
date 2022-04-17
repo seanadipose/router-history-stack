@@ -24,22 +24,33 @@ import { PageListType, PAGES_LIST } from './pages.constant';
     <footer>
       <button mat-fab (click)="goBack()">Back</button>
     </footer>
+
+    <section [class]="keypress ? 'bottom-right' : ''">
+      {{ keypress }}
+    </section>
   `,
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'router-history-stack';
-  routes: string[];
-  keyMap = new Map();
+  private readonly keyMap = new Map();
+  readonly title = 'router-history-stack';
+  readonly routes: string[];
+
+  keypress: string = '';
+  timer?: any;
+
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev: KeyboardEvent) {
     if (ev.ctrlKey && ev.keyCode !== 17) {
+      this.highlightKeypress(`ctrl+${ev.key}`);
+
       if (this.keyMap.has(`ctrl+${ev.key}`)) {
         const path = this.keyMap.get(`ctrl+${ev.key}`);
         this.router.navigateByUrl(path);
       }
     }
   }
+
   goBack() {
     let current = this.navStack.pop();
     let prev = this.navStack.peek();
@@ -51,6 +62,22 @@ export class AppComponent {
       current && this.navStack.push(current);
     }
   }
+
+  highlightKeypress(keypress: string) {
+    // clear existing timer, if any
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+
+    // set the user selection
+    this.keypress = keypress;
+
+    // reset user selection
+    this.timer = setTimeout(() => {
+      this.keypress = '';
+    }, 500);
+  }
+
   constructor(
     @Inject(NAVIGATION_STACK) private navStack: Stack<NavigationEnd>,
     @Inject(PAGES_LIST) pagesList: PageListType,
