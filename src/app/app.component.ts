@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, HostListener, Inject } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Stack } from './models/stack';
 import { NAVIGATION_STACK } from './navigation-stack.token';
@@ -31,6 +31,15 @@ export class AppComponent {
   title = 'router-history-stack';
   routes: string[];
   keyMap = new Map();
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(ev: KeyboardEvent) {
+    if (ev.ctrlKey && ev.keyCode !== 17) {
+      if (this.keyMap.has(`ctrl+${ev.key}`)) {
+        const path = this.keyMap.get(`ctrl+${ev.key}`);
+        this.router.navigateByUrl(path);
+      }
+    }
+  }
   goBack() {
     let current = this.navStack.pop();
     let prev = this.navStack.peek();
@@ -50,14 +59,16 @@ export class AppComponent {
     this.routes = pagesList;
     this.router.config.forEach((routerConf) => {
       const keyMap = routerConf.data ? routerConf.data['keymap'] : undefined;
+
       if (keyMap && !this.keyMap.has(keyMap)) {
+        console.log(keyMap);
+
         this.keyMap.set(keyMap, `/${routerConf.path}`);
       }
     });
     this.router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
         this.navStack.push(val);
-        console.log(this.navStack.peek());
       }
     });
   }
